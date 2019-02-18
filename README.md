@@ -6,8 +6,8 @@ Les règles du jeu sont disponibles en suivant [ce lien](http://www.lecomptoirde
 Le projet utilise CMake (`>= 3.0.2`) pour compiler.
 Il y a plusieurs dépendances:
 - SDL: `= 1.2`,
-- SDL_image `= 1.2`,
-- SDL_ttf `= 2.0`,
+- SDL_image: `= 1.2`,
+- SDL_ttf: `= 2.0`,
 - FMOD (optionnel pour le son): `>= 1.10.11.`
 
 ## Installer les dépendances sous Linux/Ubuntu
