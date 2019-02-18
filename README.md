@@ -42,6 +42,12 @@ Le jeu permet de jouer:
 - en mode console en modifiant en faisant: `./bin/awale --console`,
 - réseau (encore au niveau de prototype et demande de modifier le code).
 
+## Captures d'écran
+
+### Menu du jeu
+
 ![screenshot menu](media/images/screen1.png)
+
+### En jeu
 
 ![screenshot in-game](media/images/screen2.png)
