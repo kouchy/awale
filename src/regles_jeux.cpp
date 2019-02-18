@@ -63,6 +63,7 @@ int jeux_1_VS_IA (etat_jeux ej_jeux, int int_niveau){
 			int_case_jouer = saisir_case_verif(ej_jeux, int_joueur);
 		}else{
 			printf("\n\nL'ordinateur va jouer...");
+			fflush(stdout);
 			pause(1000);
 			int_case_jouer = jouer_IA(ej_jeux, int_niveau, int_joueur);
 		}
@@ -103,12 +104,14 @@ int jeux_IA_VS_IA (etat_jeux ej_jeux, int int_niveau_ia1, int int_niveau_ia2, in
 		if(int_joueur == 1){
 			if(bool_affichage){
 				printf("\n\nL'ordinateur 1 va jouer... (Niveau %d)", int_niveau_ia1);
+				fflush(stdout);
 				pause(1000);
 			}
 			int_case_jouer = jouer_IA(ej_jeux, int_niveau_ia1, int_joueur);
 		}else{
 			if(bool_affichage){
 				printf("\n\nL'ordinateur 2 va jouer... (Niveau %d)", int_niveau_ia2);
+				fflush(stdout);
 				pause(1000);
 			}
 			int_case_jouer = jouer_IA(ej_jeux, int_niveau_ia2, int_joueur);
