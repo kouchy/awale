@@ -30,20 +30,24 @@
 */
 int main(int argc, char** argv)
 {
-
 	//apprentissage_reseau();
 	srand((int)time(NULL)); //On initialise srand pour utiliser rand()
 
+	if (argc == 1)
+	{
 #ifdef AWALE_NETWORK
-	//Lancer Awalé en réseau
-	jeux_en_reseau ();
+		//Lancer Awalé en réseau
+		jeux_en_reseau();
 #else
-	//Lancer Awalé en mode SDL
-	menu_awale_sdl(0, 0);
+		//Lancer Awalé en mode SDL
+		menu_awale_sdl(0, 0);
 #endif
-
-	// //Lancer Awalé en shell
-	// menu_jeux_shell();
+	}
+	else
+	{
+		// //Lancer Awalé en shell
+		menu_jeux_shell();
+	}
 
 	return EXIT_SUCCESS;
 
