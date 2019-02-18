@@ -190,7 +190,7 @@ void calcul_nouveau_tableau(etat_jeux* pej_jeux, int int_case, int bool_affichag
 		tint_cases_ennemi[4] = 10;
 		tint_cases_ennemi[5] = 11;
 	}else{
-  		tint_cases_ennemi[0] = 0;
+		tint_cases_ennemi[0] = 0;
 		tint_cases_ennemi[1] = 1;
 		tint_cases_ennemi[2] = 2;
 		tint_cases_ennemi[3] = 3;

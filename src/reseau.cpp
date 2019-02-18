@@ -52,12 +52,12 @@ void apprentissage_reseau(){
 
 	int int_choix;
 
-	#if defined (WIN32)
-        WSADATA WSAData;
-        int erreur = WSAStartup(MAKEWORD(2,0), &WSAData);
-    #else
-        int erreur = 0;
-    #endif
+#if defined (WIN32)
+	WSADATA WSAData;
+	int erreur = WSAStartup(MAKEWORD(2,0), &WSAData);
+#else
+	int erreur = 0;
+#endif
 
 
 	printf("1 - Client\n");
@@ -200,12 +200,12 @@ void jeux_en_reseau(){
 	int int_retour=1;
 	int int_saisie;
 
-	#if defined (WIN32)
-        WSADATA WSAData;
-        int erreur = WSAStartup(MAKEWORD(2,0), &WSAData);
-    #else
-        int erreur = 0;
-    #endif
+#if defined (WIN32)
+	WSADATA WSAData;
+	int erreur = WSAStartup(MAKEWORD(2,0), &WSAData);
+#else
+	int erreur = 0;
+#endif
 
 	if(!erreur){
 		do{
