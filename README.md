@@ -4,19 +4,17 @@ Ce projet est une implémentation C/C++ du jeu de l'Awalé.
 Les règles du jeu sont disponibles en suivant [ce lien](http://www.lecomptoirdesjeux.com/l-awale.htm).
 
 Le projet utilise CMake (`>= 3.0.2`) pour compiler.
-Il y a plusieurs dépendances:
+Il y a plusieurs dépendances optionnelles à la bibliothèque `SDL-1.2` pour l'interface graphique et pour le son:
 - SDL: `= 1.2`,
 - SDL_image: `= 1.2`,
 - SDL_ttf: `= 2.0`,
-- FMOD (optionnel pour le son): `>= 1.10.11`.
+- SDL_mixer: `= 1.2`.
 
 ## Installer les dépendances sous Linux/Ubuntu
 
 ```bash
-sudo apt install cmake g++ libsdl1.2-dev libsdl-image1.2-dev libsdl-ttf2.0-dev
+sudo apt install cmake g++ libsdl1.2-dev libsdl-image1.2-dev libsdl-ttf2.0-dev libsdl-mixer1.2-dev
 ```
-
-Pour installer FMOD (pour avoir le son), il faut télécharger la bibliothèque directement sur [ce site](https://www.fmod.com/download).
 
 ## Compiler le jeu
 

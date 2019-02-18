@@ -14,7 +14,9 @@
 #include "type.h"
 #include "regles_jeux.h"
 #include "in_out.h"
+#ifdef AWALE_SDL
 #include "in_out_sdl.h"
+#endif
 #include "ia.h"
 #ifdef AWALE_NETWORK
 #include "reseau.h"
@@ -33,6 +35,7 @@ int main(int argc, char** argv)
 	//apprentissage_reseau();
 	srand((int)time(NULL)); //On initialise srand pour utiliser rand()
 
+#ifdef AWALE_SDL
 	if (argc == 1)
 	{
 #ifdef AWALE_NETWORK
@@ -45,9 +48,12 @@ int main(int argc, char** argv)
 	}
 	else
 	{
+#endif
 		// //Lancer Awalé en shell
 		menu_jeux_shell();
+#ifdef AWALE_SDL
 	}
+#endif
 
 	return EXIT_SUCCESS;
 

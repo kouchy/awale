@@ -1,3 +1,5 @@
+#ifdef AWALE_SDL
+
 /*!
 	\file    in_out_sdl.h
 	\author  Adrien CASSAGNE, Guillem BORIE et Romain DURAND SAINT OMER <adrien-cassagne@wanadoo.fr>
@@ -12,8 +14,8 @@
 
 #include <SDL/SDL.h>
 #include <SDL/SDL_ttf.h>
-#ifdef AWALE_FMOD
-#include <fmod.hpp>
+#ifdef AWALE_SDL_SOUND
+#include <SDL/SDL_mixer.h>
 #endif
 
 #define LARGEUR_FENETRE 800
@@ -62,17 +64,13 @@ struct elmts_graphiques{
 struct elmts_sonores{
 
 	int* bool_son_actif;
-#ifdef AWALE_FMOD
-	FMOD::System  *system;
-	FMOD::Channel *channel;
-	void          *extradriverdata;
-
-	FMOD::Sound *son_select_menu;
-	FMOD::Sound *son_check;
-	FMOD::Sound *son_distribution;
-	FMOD::Sound *son_win;
-	FMOD::Sound *son_sifflet;
-	FMOD::Sound *son_loose;
+#ifdef AWALE_SDL_SOUND
+	Mix_Chunk *son_select_menu;
+	Mix_Chunk *son_check;
+	Mix_Chunk *son_distribution;
+	Mix_Chunk *son_win;
+	Mix_Chunk *son_sifflet;
+	Mix_Chunk *son_loose;
 #endif
 
 };
@@ -254,7 +252,7 @@ int attente_et_affichage_sdl(int int_temps_millisecondes, elmts_graphiques elts_
 */
 void pause();
 
-#ifdef AWALE_FMOD
+#ifdef AWALE_SDL_SOUND
 /*!
 	\fn      void jouer_un_son(FMOD::Sound *son_a_jouer, elmts_sonores elts_sons)
 	\author  Adrien CASSAGNE <adrien-cassagne@wanadoo.fr>
@@ -266,7 +264,8 @@ void pause();
 	\remarks Aucunes
 
 */
-void jouer_un_son(FMOD::Sound *son_a_jouer, elmts_sonores elts_sons);
+void jouer_un_son(Mix_Chunk *son_a_jouer, elmts_sonores elts_sons);
 #endif
 
+#endif
 #endif

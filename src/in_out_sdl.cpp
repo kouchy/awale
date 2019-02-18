@@ -1,3 +1,4 @@
+#ifdef AWALE_SDL
 /*!
 	\file    in_out_sdl.cpp
 	\author  Adrien CASSAGNE, Guillem BORIE et Romain DURAND SAINT OMER <adrien-cassagne@wanadoo.fr>
@@ -12,9 +13,8 @@
 #include <SDL/SDL.h>
 #include <SDL/SDL_ttf.h>
 #include <SDL/SDL_image.h>
-
-#ifdef AWALE_FMOD
-#include "fmod/common.h"
+#ifdef AWALE_SDL_SOUND
+#include <SDL/SDL_mixer.h>
 #endif
 
 #include "type.h"
@@ -86,7 +86,7 @@ int generateur_menu(char** tchar_titres_menu, elmts_graphiques elts_graphs, elmt
 			case SDL_KEYDOWN:
 				switch (event.key.keysym.sym){
 					case SDLK_ESCAPE:
-#ifdef AWALE_FMOD
+#ifdef AWALE_SDL_SOUND
 						//Jouer le son de témoin de clic
 						jouer_un_son(elts_sons.son_select_menu, elts_sons);
 #endif
@@ -115,7 +115,7 @@ int generateur_menu(char** tchar_titres_menu, elmts_graphiques elts_graphs, elmt
 					if(tchar_titres_menu[i][0] != '0'){
 						if( (event.button.x > position_texte_menu[i].x && event.button.x < (position_texte_menu[i].x + texte_menu[i]->w)) && (event.button.y > position_texte_menu[i].y && event.button.y < (position_texte_menu[i].y + texte_menu[i]->h)) ){
 
-#ifdef FMOD
+#ifdef AWALE_SDL_SOUND
 							//Jouer le son de témoin de clic
 							jouer_un_son(elts_sons.son_select_menu, elts_sons);
 #endif
@@ -193,30 +193,15 @@ void menu_awale_sdl(int socket, int int_joueur){
 
 	//On initialise la SDL ainsi que la librairie qui gère les polices et le son
 	TTF_Init();
-    SDL_Init(SDL_INIT_VIDEO);
 
-#ifdef AWALE_FMOD
-    FMOD_RESULT result;
-    unsigned int version;
-    elts_sons.extradriverdata = 0;
-    elts_sons.channel = 0;
+	SDL_Init(SDL_INIT_VIDEO);
 
-    Common_Init(&elts_sons.extradriverdata);
-	result = FMOD::System_Create(&elts_sons.system);
-    ERRCHECK(result);
-    result = elts_sons.system->getVersion(&version);
-    ERRCHECK(result);
-    if (version < FMOD_VERSION)
-    {
-        Common_Fatal("FMOD lib version %08x doesn't match header version %08x", version, FMOD_VERSION);
-    }
-
-	result = elts_sons.system->init(32, FMOD_INIT_NORMAL, elts_sons.extradriverdata);
-    ERRCHECK(result);
+#ifdef AWALE_SDL_SOUND
+	Mix_OpenAudio( 22050, MIX_DEFAULT_FORMAT, 2, 4096);
 #endif
 
 	ecran = SDL_SetVideoMode(LARGEUR_FENETRE, HAUTEUR_FENETRE, 32, SDL_HWSURFACE | SDL_DOUBLEBUF);
-    SDL_WM_SetCaption("Awale - Le jeu", NULL);
+	SDL_WM_SetCaption("Awale - Le jeu", NULL);
 
 	//On charge les éléments graohiques et sonores
 	charger_elmts_graphiques(&elts_graphs, ecran);
@@ -287,7 +272,7 @@ void menu_awale_sdl(int socket, int int_joueur){
 					tchar_titres_menu[3] = (char*)"0";
 					tchar_titres_menu[4] = (char*)"Retour au menu";
 					int_selection = generateur_menu(tchar_titres_menu, elts_graphs, elts_sons, ej_jeux, bool_affiche_etat_jeux);
-#ifdef AWALE_FMOD
+#ifdef AWALE_SDL_SOUND
 					if(int_selection == 1){
 						if((*elts_sons.bool_son_actif)){
 							(*elts_sons.bool_son_actif) = 0;
@@ -317,15 +302,12 @@ void menu_awale_sdl(int socket, int int_joueur){
 	supprimer_elmts_graphiques(elts_graphs);
 	supprimer_elmts_sonores(elts_sons);
 
-	//On arrete SDL, TFT et FMOD
-#ifdef AWALE_FMOD
-	result = elts_sons.system->close();
-    ERRCHECK(result);
-    result = elts_sons.system->release();
-    ERRCHECK(result);
+	//On arrete SDL, TFT et MIXER
+#ifdef AWALE_SDL_SOUND
+	Mix_CloseAudio();
 #endif
-    TTF_Quit();
-    SDL_Quit();
+	TTF_Quit();
+	SDL_Quit();
 
 }
 
@@ -389,8 +371,8 @@ int jeux_1_VS_IA_SDL(etat_jeux ej_jeux, int int_niveau, elmts_graphiques elts_gr
 			free(tint_case_possible1);//Libération de l'espace mémoire
 		}
 
-        switch(event.type){
-            case SDL_QUIT:
+		switch(event.type){
+			case SDL_QUIT:
 				exit(0); //On quitte le prog si l'utilisateur le demande
 				break;
 
@@ -441,7 +423,7 @@ int jeux_1_VS_IA_SDL(etat_jeux ej_jeux, int int_niveau, elmts_graphiques elts_gr
 
 			default:
 				break;
-        }
+		}
 
 		sprintf(tchar_phrase_info, " ");
 		if((int_joueur == 1 && int_case_jouer != -1) || int_joueur == 2){
@@ -520,13 +502,13 @@ int jeux_1_VS_IA_SDL(etat_jeux ej_jeux, int int_niveau, elmts_graphiques elts_gr
 	//On affiche le vainqueur de la partie
 	if( affiche_et_retourne_vainqueur(ej_jeux, 0) == 1 ) {
 		sprintf(tchar_phrase, "Vous remportez la victoire !");
-#ifdef AWALE_FMOD
+#ifdef AWALE_SDL_SOUND
 		jouer_un_son(elts_sons.son_win, elts_sons);
 #endif
 	}else{
 		if(affiche_et_retourne_vainqueur(ej_jeux, 0) == 2){
 			sprintf(tchar_phrase, "L'ordinateur remporte la victoire !");
-#ifdef AWALE_FMOD
+#ifdef AWALE_SDL_SOUND
 			jouer_un_son(elts_sons.son_loose, elts_sons);
 #endif
 		}else{
@@ -604,8 +586,8 @@ int jeux_1_VS_1_SDL(etat_jeux ej_jeux, elmts_graphiques elts_graphs, elmts_sonor
 		free(tint_case_possible1);//Libération de l'espace mémoire
 
 
-        switch(event.type){
-            case SDL_QUIT:
+		switch(event.type){
+			case SDL_QUIT:
 				exit(0); //On quitte le prog si l'utilisateur le demande
 				break;
 
@@ -666,7 +648,7 @@ int jeux_1_VS_1_SDL(etat_jeux ej_jeux, elmts_graphiques elts_graphs, elmts_sonor
 
 			default:
 				break;
-        }
+		}
 
 		if( int_case_jouer != -1 ){
 
@@ -718,13 +700,13 @@ int jeux_1_VS_1_SDL(etat_jeux ej_jeux, elmts_graphiques elts_graphs, elmts_sonor
 	//On affiche le vainqueur de la partie
 	if( affiche_et_retourne_vainqueur(ej_jeux, 0) == 1 ) {
 		sprintf(tchar_phrase, "Le joueur 1 remporte la victoire !");
-#ifdef AWALE_FMOD
+#ifdef AWALE_SDL_SOUND
 		jouer_un_son(elts_sons.son_sifflet, elts_sons);
 #endif
 	}else{
 		if(affiche_et_retourne_vainqueur(ej_jeux, 0) == 2){
 			sprintf(tchar_phrase, "Le joueur 2 remporte la victoire !");
-#ifdef AWALE_FMOD
+#ifdef AWALE_SDL_SOUND
 			jouer_un_son(elts_sons.son_sifflet, elts_sons);
 #endif
 		}else{
@@ -818,8 +800,8 @@ int jeux_1_VS_1_RESEAU_SDL(etat_jeux ej_jeux, elmts_graphiques elts_graphs, elmt
 		free(tint_case_possible1);//Libération de l'espace mémoire
 
 
-        switch(event.type){
-            case SDL_QUIT:
+		switch(event.type){
+			case SDL_QUIT:
 				exit(0); //On quitte le prog si l'utilisateur le demande
 				break;
 
@@ -833,7 +815,6 @@ int jeux_1_VS_1_RESEAU_SDL(etat_jeux ej_jeux, elmts_graphiques elts_graphs, elmt
 						jeux_en_pause(elts_graphs);
 						event.key.keysym.sym = SDLK_t; //Empeche que la touche p soit prise en évènement ce qui ferai boucler le prog sur la pause.
 						break;
-
 				}
 				break;
 
@@ -879,7 +860,7 @@ int jeux_1_VS_1_RESEAU_SDL(etat_jeux ej_jeux, elmts_graphiques elts_graphs, elmt
 
 			default:
 				break;
-        }
+		}
 
 		if(int_joueur_qui_doit_jouer != int_joueur){
 
@@ -953,13 +934,13 @@ int jeux_1_VS_1_RESEAU_SDL(etat_jeux ej_jeux, elmts_graphiques elts_graphs, elmt
 	//On affiche le vainqueur de la partie
 	if( affiche_et_retourne_vainqueur(ej_jeux, 0) == int_joueur) {
 		sprintf(tchar_phrase, "Vous remportez la victoire !");
-#ifdef AWALE_FMOD
+#ifdef AWALE_SDL_SOUND
 		jouer_un_son(elts_sons.son_win, elts_sons);
 #endif
 	}else{
 		if(affiche_et_retourne_vainqueur(ej_jeux, 0) == int_joueur_adverse){
 			sprintf(tchar_phrase, "Vous avez perdu...");
-#ifdef AWALE_FMOD
+#ifdef AWALE_SDL_SOUND
 			jouer_un_son(elts_sons.son_loose, elts_sons);
 #endif
 		}else{
@@ -1019,8 +1000,8 @@ void jeux_en_pause(elmts_graphiques elts_graphs){
 	sprintf(tchar_phrase, "Pause...");
 	elts_graphs.psurf_texte_pause = TTF_RenderText_Blended(elts_graphs.ppolice_LTO1, tchar_phrase, elts_graphs.couleurBlanche);
 
-    int continuer = 1;
-    SDL_Event event;
+	int continuer = 1;
+	SDL_Event event;
 
 	//On change la position du texte
 	elts_graphs.position_texte_pause.x = (LARGEUR_FENETRE / 2) - (elts_graphs.psurf_texte_pause->w / 2);;
@@ -1033,11 +1014,11 @@ void jeux_en_pause(elmts_graphiques elts_graphs){
 	SDL_FreeSurface(elts_graphs.psurf_texte_pause);
 	elts_graphs.psurf_texte_pause = NULL;
 
-    while (continuer){
-        SDL_WaitEvent(&event);
-        switch(event.type){
-            case SDL_QUIT:
-                exit(0);
+	while (continuer){
+		SDL_WaitEvent(&event);
+		switch(event.type){
+			case SDL_QUIT:
+				exit(0);
 				break;
 			case SDL_KEYDOWN:
 				switch (event.key.keysym.sym){
@@ -1056,8 +1037,8 @@ void jeux_en_pause(elmts_graphiques elts_graphs){
 				break;
 			default:
 				break;
-        }
-    }
+		}
+	}
 }
 
 void blit_jeux(elmts_graphiques elts_graphs, etat_jeux ej_jeux, int bool_affiche_etat_jeux){
@@ -1193,22 +1174,14 @@ void supprimer_elmts_graphiques(elmts_graphiques elts_graphs){
 void charger_elmts_sonores(elmts_sonores* elts_sons, int bool_son_actif){
 
 	elts_sons->bool_son_actif = (int*)malloc(sizeof(int));
-#ifdef AWALE_FMOD
+#ifdef AWALE_SDL_SOUND
 	(*elts_sons->bool_son_actif) = bool_son_actif;
-	FMOD_RESULT result;
-	result = elts_sons->system->createSound(Common_MediaPath("bois1.mp3"), FMOD_DEFAULT, 0, &elts_sons->son_check);
-    ERRCHECK(result);
-    result = elts_sons->system->createSound(Common_MediaPath("bois3.mp3"), FMOD_DEFAULT, 0, &elts_sons->son_distribution);
-    ERRCHECK(result);
-    result = elts_sons->system->createSound(Common_MediaPath("bois2.mp3"), FMOD_DEFAULT, 0, &elts_sons->son_select_menu);
-    ERRCHECK(result);
-    result = elts_sons->system->createSound(Common_MediaPath("loose.mp3"), FMOD_DEFAULT, 0, &elts_sons->son_loose);
-    ERRCHECK(result);
-    result = elts_sons->system->createSound(Common_MediaPath("win.mp3"), FMOD_DEFAULT, 0, &elts_sons->son_win);
-    ERRCHECK(result);
-    result = elts_sons->system->createSound(Common_MediaPath("sifflet.wav"), FMOD_DEFAULT, 0, &elts_sons->son_sifflet);
-    ERRCHECK(result);
-
+	elts_sons->son_check        = Mix_LoadWAV("../media/sons/bois1.wav"  );
+	elts_sons->son_distribution = Mix_LoadWAV("../media/sons/bois3.wav"  );
+	elts_sons->son_select_menu  = Mix_LoadWAV("../media/sons/bois2.wav"  );
+	elts_sons->son_loose        = Mix_LoadWAV("../media/sons/loose.wav"  );
+	elts_sons->son_win          = Mix_LoadWAV("../media/sons/win.wav"    );
+	elts_sons->son_sifflet      = Mix_LoadWAV("../media/sons/sifflet.wav");
 #else
 	(*elts_sons->bool_son_actif) = 0;
 #endif
@@ -1217,20 +1190,13 @@ void charger_elmts_sonores(elmts_sonores* elts_sons, int bool_son_actif){
 
 void supprimer_elmts_sonores(elmts_sonores elts_sons){
 
-#ifdef AWALE_FMOD
-	FMOD_RESULT result;
-	result = elts_sons.son_check->release();
-    ERRCHECK(result);
-    result = elts_sons.son_distribution->release();
-    ERRCHECK(result);
-    result = elts_sons.son_select_menu->release();
-    ERRCHECK(result);
-    result = elts_sons.son_loose->release();
-    ERRCHECK(result);
-    result = elts_sons.son_win->release();
-    ERRCHECK(result);
-    result = elts_sons.son_sifflet->release();
-    ERRCHECK(result);
+#ifdef AWALE_SDL_SOUND
+	Mix_FreeChunk(elts_sons.son_check);
+	Mix_FreeChunk(elts_sons.son_distribution);
+	Mix_FreeChunk(elts_sons.son_select_menu);
+	Mix_FreeChunk(elts_sons.son_loose);
+	Mix_FreeChunk(elts_sons.son_win);
+	Mix_FreeChunk(elts_sons.son_sifflet);
 #endif
 	free(elts_sons.bool_son_actif);
 
@@ -1250,7 +1216,7 @@ int animation_distribution_graines(int int_case, etat_jeux* pej_jeux, elmts_grap
 
 	acc_e_trou(pej_jeux, int_case, 0); // On enlève tout les jetons dans la case choisi par l'utilisateur
 
-#ifdef AWALE_FMOD
+#ifdef AWALE_SDL_SOUND
 	jouer_un_son(elts_sons.son_check, elts_sons);
 #endif
 
@@ -1273,7 +1239,7 @@ int animation_distribution_graines(int int_case, etat_jeux* pej_jeux, elmts_grap
 			//On ajoute 1 jeton à la case j
 			acc_e_trou(pej_jeux, j, acc_l_trous((*pej_jeux), j) + 1 );
 
-#ifdef AWALE_FMOD
+#ifdef AWALE_SDL_SOUND
 			jouer_un_son(elts_sons.son_distribution, elts_sons);
 #endif
 
@@ -1300,7 +1266,7 @@ int animation_distribution_graines(int int_case, etat_jeux* pej_jeux, elmts_grap
 		tint_cases_ennemi[4] = 10;
 		tint_cases_ennemi[5] = 11;
 	}else{
-  		tint_cases_ennemi[0] = 0;
+		tint_cases_ennemi[0] = 0;
 		tint_cases_ennemi[1] = 1;
 		tint_cases_ennemi[2] = 2;
 		tint_cases_ennemi[3] = 3;
@@ -1315,7 +1281,7 @@ int animation_distribution_graines(int int_case, etat_jeux* pej_jeux, elmts_grap
 
 	if( (acc_l_points_j1(*pej_jeux) + acc_l_points_j2(*pej_jeux)) > total_points ){
 
-#ifdef AWALE_FMOD
+#ifdef AWALE_SDL_SOUND
 		jouer_un_son(elts_sons.son_check, elts_sons);
 #endif
 
@@ -1350,10 +1316,10 @@ int attente_et_affichage_sdl(int int_temps_millisecondes, elmts_graphiques elts_
 
 		temps_ecoule = temps_actuel - temps_base;
 
-        SDL_PollEvent(&event);
-        switch(event.type){
-            case SDL_QUIT:
-                exit(0);
+		SDL_PollEvent(&event);
+		switch(event.type){
+			case SDL_QUIT:
+				exit(0);
 				break;
 			case SDL_KEYDOWN:
 				switch (event.key.keysym.sym){
@@ -1370,11 +1336,11 @@ int attente_et_affichage_sdl(int int_temps_millisecondes, elmts_graphiques elts_
 				break;
 			default:
 				break;
-        }
+	}
 
 		blit_jeux(elts_graphs, ej_jeux, 1);
 		SDL_Flip(elts_graphs.psurf_ecran);
-    }
+	}
 
 	return(1);
 
@@ -1382,15 +1348,15 @@ int attente_et_affichage_sdl(int int_temps_millisecondes, elmts_graphiques elts_
 
 void pause(){
 
-    int continuer = 1;
-    SDL_Event event;
-    while (continuer){
+	int continuer = 1;
+	SDL_Event event;
+	while (continuer){
 
-        SDL_WaitEvent(&event);
+		SDL_WaitEvent(&event);
 
-        switch(event.type){
-            case SDL_QUIT:
-                exit(0);
+		switch(event.type){
+			case SDL_QUIT:
+				exit(0);
 				break;
 
 			case SDL_KEYDOWN:
@@ -1415,14 +1381,13 @@ void pause(){
 	}
 }
 
-#ifdef AWALE_FMOD
-#include <iostream>
-void jouer_un_son(FMOD::Sound *son_a_jouer, elmts_sonores elts_sons){
+#ifdef AWALE_SDL_SOUND
+void jouer_un_son(Mix_Chunk *son_a_jouer, elmts_sonores elts_sons){
 
 	if((*elts_sons.bool_son_actif)){
-		FMOD_RESULT result;
-		result = elts_sons.system->playSound(son_a_jouer, 0, false, &elts_sons.channel);
-		ERRCHECK(result);
+		Mix_PlayChannel(-1, son_a_jouer, 0);
 	}
 }
+#endif
+
 #endif
