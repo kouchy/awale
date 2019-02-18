@@ -8,7 +8,7 @@ Il y a plusieurs dépendances:
 - SDL: `= 1.2`,
 - SDL_image: `= 1.2`,
 - SDL_ttf: `= 2.0`,
-- FMOD (optionnel pour le son): `>= 1.10.11.`
+- FMOD (optionnel pour le son): `>= 1.10.11`.
 
 ## Installer les dépendances sous Linux/Ubuntu
 
