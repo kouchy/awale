@@ -13,12 +13,12 @@
 #include <SDL/SDL.h>
 #include <SDL/SDL_ttf.h>
 #ifdef AWALE_FMOD
-#include <fmod.h>
+#include <fmod.hpp>
 #endif
 
-#define LARGEUR_FENETRE     800
-#define HAUTEUR_FENETRE     400
-#define HAUTEUR_JEUX        320
+#define LARGEUR_FENETRE 800
+#define HAUTEUR_FENETRE 400
+#define HAUTEUR_JEUX    320
 
 /*!
 	\struct  elmts_graphiques
@@ -63,12 +63,16 @@ struct elmts_sonores{
 
 	int* bool_son_actif;
 #ifdef AWALE_FMOD
-	FSOUND_SAMPLE *son_select_menu;
-	FSOUND_SAMPLE *son_check;
-	FSOUND_SAMPLE *son_distribution;
-	FSOUND_SAMPLE *son_win;
-	FSOUND_SAMPLE *son_sifflet;
-	FSOUND_SAMPLE *son_loose;
+	FMOD::System  *system;
+	FMOD::Channel *channel;
+	void          *extradriverdata;
+
+	FMOD::Sound *son_select_menu;
+	FMOD::Sound *son_check;
+	FMOD::Sound *son_distribution;
+	FMOD::Sound *son_win;
+	FMOD::Sound *son_sifflet;
+	FMOD::Sound *son_loose;
 #endif
 
 };
@@ -252,7 +256,7 @@ void pause();
 
 #ifdef AWALE_FMOD
 /*!
-	\fn      void jouer_un_son(FSOUND_SAMPLE *son_a_jouer, elmts_sonores elts_sons)
+	\fn      void jouer_un_son(FMOD::Sound *son_a_jouer, elmts_sonores elts_sons)
 	\author  Adrien CASSAGNE <adrien-cassagne@wanadoo.fr>
 	\version 0.1
 	\brief   Fonction qui joue un son à la condition que le son soit activé dans le jeux (si il est désactivé alors le son n'est pas joué)
@@ -262,7 +266,7 @@ void pause();
 	\remarks Aucunes
 
 */
-void jouer_un_son(FSOUND_SAMPLE *son_a_jouer, elmts_sonores elts_sons);
+void jouer_un_son(FMOD::Sound *son_a_jouer, elmts_sonores elts_sons);
 #endif
 
 #endif

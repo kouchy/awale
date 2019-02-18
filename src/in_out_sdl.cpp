@@ -9,12 +9,12 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-//#include <windows.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_ttf.h>
 #include <SDL/SDL_image.h>
+
 #ifdef AWALE_FMOD
-#include <fmod.h>
+#include "fmod/common.h"
 #endif
 
 #include "type.h"
@@ -196,8 +196,23 @@ void menu_awale_sdl(int socket, int int_joueur){
     SDL_Init(SDL_INIT_VIDEO);
 
 #ifdef AWALE_FMOD
-	//On lance Fmod la librairie qui gère le son
-	FSOUND_Init(44100, 32, 0); //Qalité du son : CD
+    FMOD_RESULT result;
+    unsigned int version;
+    elts_sons.extradriverdata = 0;
+    elts_sons.channel = 0;
+
+    Common_Init(&elts_sons.extradriverdata);
+	result = FMOD::System_Create(&elts_sons.system);
+    ERRCHECK(result);
+    result = elts_sons.system->getVersion(&version);
+    ERRCHECK(result);
+    if (version < FMOD_VERSION)
+    {
+        Common_Fatal("FMOD lib version %08x doesn't match header version %08x", version, FMOD_VERSION);
+    }
+
+	result = elts_sons.system->init(32, FMOD_INIT_NORMAL, elts_sons.extradriverdata);
+    ERRCHECK(result);
 #endif
 
 	ecran = SDL_SetVideoMode(LARGEUR_FENETRE, HAUTEUR_FENETRE, 32, SDL_HWSURFACE | SDL_DOUBLEBUF);
@@ -304,7 +319,10 @@ void menu_awale_sdl(int socket, int int_joueur){
 
 	//On arrete SDL, TFT et FMOD
 #ifdef AWALE_FMOD
-	FSOUND_Close();
+	result = elts_sons.system->close();
+    ERRCHECK(result);
+    result = elts_sons.system->release();
+    ERRCHECK(result);
 #endif
     TTF_Quit();
     SDL_Quit();
@@ -1177,12 +1195,20 @@ void charger_elmts_sonores(elmts_sonores* elts_sons, int bool_son_actif){
 	elts_sons->bool_son_actif = (int*)malloc(sizeof(int));
 #ifdef AWALE_FMOD
 	(*elts_sons->bool_son_actif) = bool_son_actif;
-	elts_sons->son_check = FSOUND_Sample_Load(FSOUND_FREE, "../media/sons/bois1.mp3", 0, 0, 0);
-	elts_sons->son_distribution = FSOUND_Sample_Load(FSOUND_FREE, "../media/sons/bois3.mp3", 0, 0, 0);
-	elts_sons->son_select_menu = FSOUND_Sample_Load(FSOUND_FREE, "../media/sons/bois2.mp3", 0, 0, 0);
-	elts_sons->son_loose = FSOUND_Sample_Load(FSOUND_FREE, "../media/sons/loose.mp3", 0, 0, 0);
-	elts_sons->son_win = FSOUND_Sample_Load(FSOUND_FREE, "../media/sons/win.mp3", 0, 0, 0);
-	elts_sons->son_sifflet = FSOUND_Sample_Load(FSOUND_FREE, "../media/sons/sifflet.wav", 0, 0, 0);
+	FMOD_RESULT result;
+	result = elts_sons->system->createSound(Common_MediaPath("bois1.mp3"), FMOD_DEFAULT, 0, &elts_sons->son_check);
+    ERRCHECK(result);
+    result = elts_sons->system->createSound(Common_MediaPath("bois3.mp3"), FMOD_DEFAULT, 0, &elts_sons->son_distribution);
+    ERRCHECK(result);
+    result = elts_sons->system->createSound(Common_MediaPath("bois2.mp3"), FMOD_DEFAULT, 0, &elts_sons->son_select_menu);
+    ERRCHECK(result);
+    result = elts_sons->system->createSound(Common_MediaPath("loose.mp3"), FMOD_DEFAULT, 0, &elts_sons->son_loose);
+    ERRCHECK(result);
+    result = elts_sons->system->createSound(Common_MediaPath("win.mp3"), FMOD_DEFAULT, 0, &elts_sons->son_win);
+    ERRCHECK(result);
+    result = elts_sons->system->createSound(Common_MediaPath("sifflet.wav"), FMOD_DEFAULT, 0, &elts_sons->son_sifflet);
+    ERRCHECK(result);
+
 #else
 	(*elts_sons->bool_son_actif) = 0;
 #endif
@@ -1192,12 +1218,19 @@ void charger_elmts_sonores(elmts_sonores* elts_sons, int bool_son_actif){
 void supprimer_elmts_sonores(elmts_sonores elts_sons){
 
 #ifdef AWALE_FMOD
-	FSOUND_Sample_Free(elts_sons.son_check);
-	FSOUND_Sample_Free(elts_sons.son_distribution);
-	FSOUND_Sample_Free(elts_sons.son_select_menu);
-	FSOUND_Sample_Free(elts_sons.son_loose);
-	FSOUND_Sample_Free(elts_sons.son_win);
-	FSOUND_Sample_Free(elts_sons.son_sifflet);
+	FMOD_RESULT result;
+	result = elts_sons.son_check->release();
+    ERRCHECK(result);
+    result = elts_sons.son_distribution->release();
+    ERRCHECK(result);
+    result = elts_sons.son_select_menu->release();
+    ERRCHECK(result);
+    result = elts_sons.son_loose->release();
+    ERRCHECK(result);
+    result = elts_sons.son_win->release();
+    ERRCHECK(result);
+    result = elts_sons.son_sifflet->release();
+    ERRCHECK(result);
 #endif
 	free(elts_sons.bool_son_actif);
 
@@ -1378,15 +1411,18 @@ void pause(){
 				break;
 			default:
 				break;
-        }
-    }
+		}
+	}
 }
 
 #ifdef AWALE_FMOD
-void jouer_un_son(FSOUND_SAMPLE *son_a_jouer, elmts_sonores elts_sons){
+#include <iostream>
+void jouer_un_son(FMOD::Sound *son_a_jouer, elmts_sonores elts_sons){
 
 	if((*elts_sons.bool_son_actif)){
-		FSOUND_PlaySound(FSOUND_FREE, son_a_jouer);
+		FMOD_RESULT result;
+		result = elts_sons.system->playSound(son_a_jouer, 0, false, &elts_sons.channel);
+		ERRCHECK(result);
 	}
 }
 #endif
