@@ -26,7 +26,7 @@ int jouer_IA(etat_jeux ej_jeux, int int_niveau, int int_joueur){
 	int tint_diff_max_gain[7];
 	int tint_diff_max_gain2[6];
 	int tint_max_points_hypothetiques[7];
-	int int_max_gain;
+	int int_max_gain = 0;
 	int int_nb_case;
 	int int_max_chance_hypothetiques;
 	int int_max_gain_hypothetiques;
@@ -294,12 +294,13 @@ int** tableau_des_gains(etat_jeux ej_jeux, int int_joueur){
 	int int_nb_points_diff;
 	etat_jeux ej_jeux_simulation;
 
+	ptint_cases_jouables = cases_jouables(ej_jeux, int_joueur);
+
 	tint_points = (int**)malloc(sizeof(int*) * 3);
 	tint_points[0] = (int*)malloc(sizeof(int) * 2); //nb de case possible a jouer [0] et maximum des gains [1]
-	tint_points[1] = (int*)malloc(sizeof(int) * 6); //Numéros des cases
-	tint_points[2] = (int*)malloc(sizeof(int) * 6); //Gains que rapporte de jouer ces cases
+	tint_points[1] = (int*)malloc(sizeof(int) * ptint_cases_jouables[0]); //Numéros des cases
+	tint_points[2] = (int*)malloc(sizeof(int) * ptint_cases_jouables[0]); //Gains que rapporte de jouer ces cases
 
-	ptint_cases_jouables = cases_jouables(ej_jeux, int_joueur);
 	tint_points[0][0] = ptint_cases_jouables[0];
 	tint_points[0][1] = 0;
 
@@ -353,12 +354,12 @@ int** tableau_des_pertes(etat_jeux ej_jeux, int int_joueur){
 	etat_jeux ej_jeux_simulation1;
 	etat_jeux ej_jeux_simulation2;
 
+	ptint_cases_jouables1 = cases_jouables(ej_jeux, int_joueur);
+
 	tint_points_pertes = (int**)malloc(sizeof(int*) * 3);
 	tint_points_pertes[0] = (int*)malloc(sizeof(int) * 2); //nbr de case possible a jouer [0] et maximum des pertes [1]
-	tint_points_pertes[1] = (int*)malloc(sizeof(int) * 6); //Numéros des cases
-	tint_points_pertes[2] = (int*)malloc(sizeof(int) * 6); //Pertes subit en jouant ces cases
-
-	ptint_cases_jouables1 = cases_jouables(ej_jeux, int_joueur);
+	tint_points_pertes[1] = (int*)malloc(sizeof(int) * ptint_cases_jouables1[0]); //Numéros des cases
+	tint_points_pertes[2] = (int*)malloc(sizeof(int) * ptint_cases_jouables1[0]); //Pertes subit en jouant ces cases
 
 	if(int_joueur == 1){
 		int_joueur_adverse = 2;
