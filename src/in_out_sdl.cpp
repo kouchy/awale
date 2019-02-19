@@ -33,6 +33,7 @@ int generateur_menu(char** tchar_titres_menu, elmts_graphiques elts_graphs, elmt
 	int bool_continuer=1;
 	int bool_passage=0;
 	int int_selection=-1;
+	int int_ret_event=1;
 
 	SDL_Event event;
 
@@ -71,66 +72,69 @@ int generateur_menu(char** tchar_titres_menu, elmts_graphiques elts_graphs, elmt
 	while(bool_continuer){
 
 		if(!bool_passage){
-			SDL_PollEvent(&event);
+			int_ret_event = SDL_PollEvent(&event);
 			bool_passage = 1;
 		}else{
-			SDL_WaitEvent(&event);
+			int_ret_event = SDL_WaitEvent(&event);
 		}
 
-		switch(event.type){
-            case SDL_QUIT:
-                exit(0);
-				break;
+		if (int_ret_event)
+		{
+			switch(event.type){
+				case SDL_QUIT:
+					exit(0);
+					break;
 
-			//Si l'utilisateur appuie sur echap alors on sort du menu
-			case SDL_KEYDOWN:
-				switch (event.key.keysym.sym){
-					case SDLK_ESCAPE:
-#ifdef AWALE_SDL_SOUND
-						//Jouer le son de témoin de clic
-						jouer_un_son(elts_sons.son_select_menu, elts_sons);
-#endif
-						int_selection = 0;
-						bool_continuer = 0;
-						break;
-					default:
-						break;
-				}
-				break;
-
-			//On souligne si l'utilisateur à la souris sur un champ du menu
-			case SDL_MOUSEMOTION:
-				for(int i=0; i<5; i++){
-					if(tchar_titres_menu[i][0] != '0'){
-						if( (event.button.x > position_texte_menu[i].x && event.button.x < (position_texte_menu[i].x + texte_menu[i]->w)) && (event.button.y > position_texte_menu[i].y && event.button.y < (position_texte_menu[i].y + texte_menu[i]->h)) ){
-							bool_texte_menu[i] = 1;
-						}
-					}
-				}
-				break;
-
-			//On retourne le numéros du lien sur lequel l'utilisateur a cliqué
-			case SDL_MOUSEBUTTONUP:
-				for(int i=1; i<5; i++){
-					if(tchar_titres_menu[i][0] != '0'){
-						if( (event.button.x > position_texte_menu[i].x && event.button.x < (position_texte_menu[i].x + texte_menu[i]->w)) && (event.button.y > position_texte_menu[i].y && event.button.y < (position_texte_menu[i].y + texte_menu[i]->h)) ){
-
+				//Si l'utilisateur appuie sur echap alors on sort du menu
+				case SDL_KEYDOWN:
+					switch (event.key.keysym.sym){
+						case SDLK_ESCAPE:
 #ifdef AWALE_SDL_SOUND
 							//Jouer le son de témoin de clic
 							jouer_un_son(elts_sons.son_select_menu, elts_sons);
 #endif
-
-							int_selection = i;
+							int_selection = 0;
 							bool_continuer = 0;
+							break;
+						default:
+							break;
+					}
+					break;
+
+				//On souligne si l'utilisateur à la souris sur un champ du menu
+				case SDL_MOUSEMOTION:
+					for(int i=0; i<5; i++){
+						if(tchar_titres_menu[i][0] != '0'){
+							if( (event.button.x > position_texte_menu[i].x && event.button.x < (position_texte_menu[i].x + texte_menu[i]->w)) && (event.button.y > position_texte_menu[i].y && event.button.y < (position_texte_menu[i].y + texte_menu[i]->h)) ){
+								bool_texte_menu[i] = 1;
+							}
 						}
 					}
-				}
-				//On met l'évenement position souris à l'origine pour éviter qu'il n'interfère
-				event.button.x = 0;
-				event.button.y = 0;
-				break;
-			default:
-				break;
+					break;
+
+				//On retourne le numéros du lien sur lequel l'utilisateur a cliqué
+				case SDL_MOUSEBUTTONUP:
+					for(int i=1; i<5; i++){
+						if(tchar_titres_menu[i][0] != '0'){
+							if( (event.button.x > position_texte_menu[i].x && event.button.x < (position_texte_menu[i].x + texte_menu[i]->w)) && (event.button.y > position_texte_menu[i].y && event.button.y < (position_texte_menu[i].y + texte_menu[i]->h)) ){
+
+#ifdef AWALE_SDL_SOUND
+								//Jouer le son de témoin de clic
+								jouer_un_son(elts_sons.son_select_menu, elts_sons);
+#endif
+
+								int_selection = i;
+								bool_continuer = 0;
+							}
+						}
+					}
+					//On met l'évenement position souris à l'origine pour éviter qu'il n'interfère
+					event.button.x = 0;
+					event.button.y = 0;
+					break;
+				default:
+					break;
+			}
 		}
 
 		//On affiche ici le menu à proprement parlé
@@ -359,7 +363,6 @@ int jeux_1_VS_IA_SDL(etat_jeux ej_jeux, int int_niveau, elmts_graphiques elts_gr
 		}
 
 		int_case_jouer = -1; //On met -1 dans la case à joueur par défault
-		SDL_PollEvent(&event); //On récupère les évènement (Non blocquant)
 
 		if(int_joueur == 1){
 			tint_case_possible1 = cases_jouables(ej_jeux, int_joueur); //On récupère le tableau des cases possibles à jouer
@@ -371,58 +374,61 @@ int jeux_1_VS_IA_SDL(etat_jeux ej_jeux, int int_niveau, elmts_graphiques elts_gr
 			free(tint_case_possible1);//Libération de l'espace mémoire
 		}
 
-		switch(event.type){
-			case SDL_QUIT:
-				exit(0); //On quitte le prog si l'utilisateur le demande
-				break;
+		if (SDL_PollEvent(&event)) //On récupère les évènement (Non blocquant)
+		{
+			switch(event.type){
+				case SDL_QUIT:
+					exit(0); //On quitte le prog si l'utilisateur le demande
+					break;
 
-			case SDL_KEYDOWN:
-				switch (event.key.keysym.sym){
-					case SDLK_ESCAPE: //On quitte la partie en cours si le joueur appuie sur la touche echap
-						bool_continuer = 0;
-						event.key.keysym.sym = SDLK_t;
-						break;
-					case SDLK_p: //On quitte la partie en cours si le joueur appuie sur la touche echap
-						jeux_en_pause(elts_graphs);
-						event.key.keysym.sym = SDLK_t; //Empeche que la touche p soit prise en évènement ce qui ferai boucler le prog sur la pause.
-						break;
-					default:
-						break;
-				}
-				break;
+				case SDL_KEYDOWN:
+					switch (event.key.keysym.sym){
+						case SDLK_ESCAPE: //On quitte la partie en cours si le joueur appuie sur la touche echap
+							bool_continuer = 0;
+							event.key.keysym.sym = SDLK_t;
+							break;
+						case SDLK_p: //On quitte la partie en cours si le joueur appuie sur la touche echap
+							jeux_en_pause(elts_graphs);
+							event.key.keysym.sym = SDLK_t; //Empeche que la touche p soit prise en évènement ce qui ferai boucler le prog sur la pause.
+							break;
+						default:
+							break;
+					}
+					break;
 
-			case SDL_MOUSEMOTION:
-				if(int_joueur == 1){
-					for(int i=0; i<6; i++){
-						if( (event.button.x > (tint_positions_trous[i][0] - 30) && event.button.x < (tint_positions_trous[i][0] + 30)) && (event.button.y > (tint_positions_trous[i][1] - 30) && event.button.y < (tint_positions_trous[i][1] + 30)) ){
-							position_fleche.x = tint_positions_trous[i][0] - 15;
-							position_fleche.y = tint_positions_trous[i][1] + 35;
-							if(appartient_int_tab(i, tint_case_possible2, int_taille_case_possible2)){
-								bool_fleche = 1;
+				case SDL_MOUSEMOTION:
+					if(int_joueur == 1){
+						for(int i=0; i<6; i++){
+							if( (event.button.x > (tint_positions_trous[i][0] - 30) && event.button.x < (tint_positions_trous[i][0] + 30)) && (event.button.y > (tint_positions_trous[i][1] - 30) && event.button.y < (tint_positions_trous[i][1] + 30)) ){
+								position_fleche.x = tint_positions_trous[i][0] - 15;
+								position_fleche.y = tint_positions_trous[i][1] + 35;
+								if(appartient_int_tab(i, tint_case_possible2, int_taille_case_possible2)){
+									bool_fleche = 1;
+								}
 							}
 						}
 					}
-				}
-				break;
+					break;
 
-			case SDL_MOUSEBUTTONUP:
-				if(int_joueur == 1){
-					for(int i=0; i<6; i++){
-						if( (event.button.x > (tint_positions_trous[i][0] - 30) && event.button.x < (tint_positions_trous[i][0] + 30)) && (event.button.y > (tint_positions_trous[i][1] - 30) && event.button.y < (tint_positions_trous[i][1] + 30)) ){
-							int_case_jouer = i;
+				case SDL_MOUSEBUTTONUP:
+					if(int_joueur == 1){
+						for(int i=0; i<6; i++){
+							if( (event.button.x > (tint_positions_trous[i][0] - 30) && event.button.x < (tint_positions_trous[i][0] + 30)) && (event.button.y > (tint_positions_trous[i][1] - 30) && event.button.y < (tint_positions_trous[i][1] + 30)) ){
+								int_case_jouer = i;
+							}
+						}
+						if(int_case_jouer != -1){
+							if(!appartient_int_tab(int_case_jouer, tint_case_possible2, int_taille_case_possible2)){
+								int_case_jouer = -1;
+							}
 						}
 					}
-					if(int_case_jouer != -1){
-						if(!appartient_int_tab(int_case_jouer, tint_case_possible2, int_taille_case_possible2)){
-							int_case_jouer = -1;
-						}
-					}
-				}
-				event.type = SDL_MOUSEBUTTONDOWN;//Empeche que si on ne bouge pas de position, la case et rejouer
-				break;
+					event.type = SDL_MOUSEBUTTONDOWN;//Empeche que si on ne bouge pas de position, la case et rejouer
+					break;
 
-			default:
-				break;
+				default:
+					break;
+			}
 		}
 
 		sprintf(tchar_phrase_info, " ");
@@ -574,8 +580,6 @@ int jeux_1_VS_1_SDL(etat_jeux ej_jeux, elmts_graphiques elts_graphs, elmts_sonor
 		}
 
 		int_case_jouer = -1; //On met -1 dans la case à joueur par défault
-		SDL_PollEvent(&event); //On récupère les évènement (Non blocquant)
-
 
 		tint_case_possible1 = cases_jouables(ej_jeux, int_joueur); //On récupère le tableau des cases possibles à jouer
 		int_taille_case_possible2 = tint_case_possible1[0]; //On récupère la taille du tableau des cases possibles à jouer
@@ -586,68 +590,71 @@ int jeux_1_VS_1_SDL(etat_jeux ej_jeux, elmts_graphiques elts_graphs, elmts_sonor
 		free(tint_case_possible1);//Libération de l'espace mémoire
 
 
-		switch(event.type){
-			case SDL_QUIT:
-				exit(0); //On quitte le prog si l'utilisateur le demande
-				break;
+		if (SDL_PollEvent(&event)) //On récupère les évènement (Non blocquant)
+		{
+			switch(event.type){
+				case SDL_QUIT:
+					exit(0); //On quitte le prog si l'utilisateur le demande
+					break;
 
-			case SDL_KEYDOWN:
-				switch (event.key.keysym.sym){
-					case SDLK_ESCAPE: //On quitte la partie en cours si le joueur appuie sur la touche echap
-						bool_continuer = 0;
-						event.key.keysym.sym = SDLK_t;
-						break;
-					case SDLK_p: //On quitte la partie en cours si le joueur appuie sur la touche echap
-						jeux_en_pause(elts_graphs);
-						event.key.keysym.sym = SDLK_t; //Empeche que la touche p soit prise en évènement ce qui ferai boucler le prog sur la pause.
-						break;
-					default:
-						break;
-				}
-				break;
+				case SDL_KEYDOWN:
+					switch (event.key.keysym.sym){
+						case SDLK_ESCAPE: //On quitte la partie en cours si le joueur appuie sur la touche echap
+							bool_continuer = 0;
+							event.key.keysym.sym = SDLK_t;
+							break;
+						case SDLK_p: //On quitte la partie en cours si le joueur appuie sur la touche echap
+							jeux_en_pause(elts_graphs);
+							event.key.keysym.sym = SDLK_t; //Empeche que la touche p soit prise en évènement ce qui ferai boucler le prog sur la pause.
+							break;
+						default:
+							break;
+					}
+					break;
 
-			case SDL_MOUSEMOTION:
-				if(int_joueur == 1){
-					for(int i=0; i<6; i++){
-						if( (event.button.x > (tint_positions_trous[i][0] - 30) && event.button.x < (tint_positions_trous[i][0] + 30)) && (event.button.y > (tint_positions_trous[i][1] - 30) && event.button.y < (tint_positions_trous[i][1] + 30)) ){
-							position_fleche.x = tint_positions_trous[i][0] - 15;
-							position_fleche.y = tint_positions_trous[i][1] + 35;
-							if(appartient_int_tab(i, tint_case_possible2, int_taille_case_possible2)){
-								bool_fleche = 1;
+				case SDL_MOUSEMOTION:
+					if(int_joueur == 1){
+						for(int i=0; i<6; i++){
+							if( (event.button.x > (tint_positions_trous[i][0] - 30) && event.button.x < (tint_positions_trous[i][0] + 30)) && (event.button.y > (tint_positions_trous[i][1] - 30) && event.button.y < (tint_positions_trous[i][1] + 30)) ){
+								position_fleche.x = tint_positions_trous[i][0] - 15;
+								position_fleche.y = tint_positions_trous[i][1] + 35;
+								if(appartient_int_tab(i, tint_case_possible2, int_taille_case_possible2)){
+									bool_fleche = 1;
+								}
+							}
+						}
+					}else{
+						for(int i=6; i<12; i++){
+							if( (event.button.x > (tint_positions_trous[i][0] - 30) && event.button.x < (tint_positions_trous[i][0] + 30)) && (event.button.y > (tint_positions_trous[i][1] - 30) && event.button.y < (tint_positions_trous[i][1] + 30)) ){
+								position_fleche.x = tint_positions_trous[i][0] - 15;
+								position_fleche.y = tint_positions_trous[i][1] - 35 - image_fleche2->h;
+								if(appartient_int_tab(i, tint_case_possible2, int_taille_case_possible2)){
+									bool_fleche = 1;
+								}
 							}
 						}
 					}
-				}else{
-					for(int i=6; i<12; i++){
-						if( (event.button.x > (tint_positions_trous[i][0] - 30) && event.button.x < (tint_positions_trous[i][0] + 30)) && (event.button.y > (tint_positions_trous[i][1] - 30) && event.button.y < (tint_positions_trous[i][1] + 30)) ){
-							position_fleche.x = tint_positions_trous[i][0] - 15;
-							position_fleche.y = tint_positions_trous[i][1] - 35 - image_fleche2->h;
-							if(appartient_int_tab(i, tint_case_possible2, int_taille_case_possible2)){
-								bool_fleche = 1;
+					break;
+
+				case SDL_MOUSEBUTTONUP:
+					//if(int_joueur == 1){
+						for(int i=0; i<12; i++){
+							if( (event.button.x > (tint_positions_trous[i][0] - 30) && event.button.x < (tint_positions_trous[i][0] + 30)) && (event.button.y > (tint_positions_trous[i][1] - 30) && event.button.y < (tint_positions_trous[i][1] + 30)) ){
+								int_case_jouer = i;
 							}
 						}
-					}
-				}
-				break;
-
-			case SDL_MOUSEBUTTONUP:
-				//if(int_joueur == 1){
-					for(int i=0; i<12; i++){
-						if( (event.button.x > (tint_positions_trous[i][0] - 30) && event.button.x < (tint_positions_trous[i][0] + 30)) && (event.button.y > (tint_positions_trous[i][1] - 30) && event.button.y < (tint_positions_trous[i][1] + 30)) ){
-							int_case_jouer = i;
+						if(int_case_jouer != -1){
+							if(!appartient_int_tab(int_case_jouer, tint_case_possible2, int_taille_case_possible2)){
+								int_case_jouer = -1;
+							}
 						}
-					}
-					if(int_case_jouer != -1){
-						if(!appartient_int_tab(int_case_jouer, tint_case_possible2, int_taille_case_possible2)){
-							int_case_jouer = -1;
-						}
-					}
-				//}
-				event.type = SDL_MOUSEBUTTONDOWN;//Empeche que si on ne bouge pas de position, la case et rejouer
-				break;
+					//}
+					event.type = SDL_MOUSEBUTTONDOWN;//Empeche que si on ne bouge pas de position, la case et rejouer
+					break;
 
-			default:
-				break;
+				default:
+					break;
+			}
 		}
 
 		if( int_case_jouer != -1 ){
@@ -788,8 +795,6 @@ int jeux_1_VS_1_RESEAU_SDL(etat_jeux ej_jeux, elmts_graphiques elts_graphs, elmt
 		}
 
 		int_case_jouer = -1; //On met -1 dans la case à joueur par défault
-		SDL_PollEvent(&event); //On récupère les évènement (Non blocquant)
-
 
 		tint_case_possible1 = cases_jouables(ej_jeux, int_joueur); //On récupère le tableau des cases possibles à jouer
 		int_taille_case_possible2 = tint_case_possible1[0]; //On récupère la taille du tableau des cases possibles à jouer
@@ -799,67 +804,69 @@ int jeux_1_VS_1_RESEAU_SDL(etat_jeux ej_jeux, elmts_graphiques elts_graphs, elmt
 		}
 		free(tint_case_possible1);//Libération de l'espace mémoire
 
+		if (SDL_PollEvent(&event)) //On récupère les évènement (Non blocquant)
+		{
+			switch(event.type){
+				case SDL_QUIT:
+					exit(0); //On quitte le prog si l'utilisateur le demande
+					break;
 
-		switch(event.type){
-			case SDL_QUIT:
-				exit(0); //On quitte le prog si l'utilisateur le demande
-				break;
+				case SDL_KEYDOWN:
+					switch (event.key.keysym.sym){
+						case SDLK_ESCAPE: //On quitte la partie en cours si le joueur appuie sur la touche echap
+							bool_continuer = 0;
+							event.key.keysym.sym = SDLK_t;
+							break;
+						case SDLK_p: //On quitte la partie en cours si le joueur appuie sur la touche echap
+							jeux_en_pause(elts_graphs);
+							event.key.keysym.sym = SDLK_t; //Empeche que la touche p soit prise en évènement ce qui ferai boucler le prog sur la pause.
+							break;
+					}
+					break;
 
-			case SDL_KEYDOWN:
-				switch (event.key.keysym.sym){
-					case SDLK_ESCAPE: //On quitte la partie en cours si le joueur appuie sur la touche echap
-						bool_continuer = 0;
-						event.key.keysym.sym = SDLK_t;
-						break;
-					case SDLK_p: //On quitte la partie en cours si le joueur appuie sur la touche echap
-						jeux_en_pause(elts_graphs);
-						event.key.keysym.sym = SDLK_t; //Empeche que la touche p soit prise en évènement ce qui ferai boucler le prog sur la pause.
-						break;
-				}
-				break;
-
-			case SDL_MOUSEMOTION:
-				if(int_joueur == 1){
-					for(int i=0; i<6; i++){
-						if( (event.button.x > (tint_positions_trous[i][0] - 30) && event.button.x < (tint_positions_trous[i][0] + 30)) && (event.button.y > (tint_positions_trous[i][1] - 30) && event.button.y < (tint_positions_trous[i][1] + 30)) ){
-							position_fleche.x = tint_positions_trous[i][0] - 15;
-							position_fleche.y = tint_positions_trous[i][1] + 35;
-							if(appartient_int_tab(i, tint_case_possible2, int_taille_case_possible2)){
-								bool_fleche = 1;
+				case SDL_MOUSEMOTION:
+					if(int_joueur == 1){
+						for(int i=0; i<6; i++){
+							if( (event.button.x > (tint_positions_trous[i][0] - 30) && event.button.x < (tint_positions_trous[i][0] + 30)) && (event.button.y > (tint_positions_trous[i][1] - 30) && event.button.y < (tint_positions_trous[i][1] + 30)) ){
+								position_fleche.x = tint_positions_trous[i][0] - 15;
+								position_fleche.y = tint_positions_trous[i][1] + 35;
+								if(appartient_int_tab(i, tint_case_possible2, int_taille_case_possible2)){
+									bool_fleche = 1;
+								}
+							}
+						}
+					}else{
+						for(int i=6; i<12; i++){
+							if( (event.button.x > (tint_positions_trous[i][0] - 30) && event.button.x < (tint_positions_trous[i][0] + 30)) && (event.button.y > (tint_positions_trous[i][1] - 30) && event.button.y < (tint_positions_trous[i][1] + 30)) ){
+								position_fleche.x = tint_positions_trous[i][0] - 15;
+								position_fleche.y = tint_positions_trous[i][1] - 35 - image_fleche2->h;
+								if(appartient_int_tab(i, tint_case_possible2, int_taille_case_possible2)){
+									bool_fleche = 1;
+								}
 							}
 						}
 					}
-				}else{
-					for(int i=6; i<12; i++){
-						if( (event.button.x > (tint_positions_trous[i][0] - 30) && event.button.x < (tint_positions_trous[i][0] + 30)) && (event.button.y > (tint_positions_trous[i][1] - 30) && event.button.y < (tint_positions_trous[i][1] + 30)) ){
-							position_fleche.x = tint_positions_trous[i][0] - 15;
-							position_fleche.y = tint_positions_trous[i][1] - 35 - image_fleche2->h;
-							if(appartient_int_tab(i, tint_case_possible2, int_taille_case_possible2)){
-								bool_fleche = 1;
+					break;
+
+				case SDL_MOUSEBUTTONUP:
+					//if(int_joueur == 1){
+						for(int i=0; i<12; i++){
+							if( (event.button.x > (tint_positions_trous[i][0] - 30) && event.button.x < (tint_positions_trous[i][0] + 30)) && (event.button.y > (tint_positions_trous[i][1] - 30) && event.button.y < (tint_positions_trous[i][1] + 30)) ){
+								int_case_jouer = i;
 							}
 						}
-					}
-				}
-				break;
-
-			case SDL_MOUSEBUTTONUP:
-				//if(int_joueur == 1){
-					for(int i=0; i<12; i++){
-						if( (event.button.x > (tint_positions_trous[i][0] - 30) && event.button.x < (tint_positions_trous[i][0] + 30)) && (event.button.y > (tint_positions_trous[i][1] - 30) && event.button.y < (tint_positions_trous[i][1] + 30)) ){
-							int_case_jouer = i;
+						if(int_case_jouer != -1){
+							if(!appartient_int_tab(int_case_jouer, tint_case_possible2, int_taille_case_possible2)){
+								int_case_jouer = -1;
+							}
 						}
-					}
-					if(int_case_jouer != -1){
-						if(!appartient_int_tab(int_case_jouer, tint_case_possible2, int_taille_case_possible2)){
-							int_case_jouer = -1;
-						}
-					}
-				//}
-				event.type = SDL_MOUSEBUTTONDOWN;//Empeche que si on ne bouge pas de position, la case et rejouer
-				break;
+					//}
+					event.type = SDL_MOUSEBUTTONDOWN;//Empeche que si on ne bouge pas de position, la case et rejouer
+					break;
 
-			default:
-				break;
+				default:
+					break;
+			}
 		}
 
 		if(int_joueur_qui_doit_jouer != int_joueur){
@@ -1316,26 +1323,28 @@ int attente_et_affichage_sdl(int int_temps_millisecondes, elmts_graphiques elts_
 
 		temps_ecoule = temps_actuel - temps_base;
 
-		SDL_PollEvent(&event);
-		switch(event.type){
-			case SDL_QUIT:
-				exit(0);
-				break;
-			case SDL_KEYDOWN:
-				switch (event.key.keysym.sym){
-					case SDLK_ESCAPE:
-						return(0);
-						break;
-					case SDLK_p:
-						jeux_en_pause(elts_graphs);
-						event.key.keysym.sym = SDLK_t;
-						break;
-					default:
-						break;
-				}
-				break;
-			default:
-				break;
+		if (SDL_PollEvent(&event))
+		{
+			switch(event.type){
+				case SDL_QUIT:
+					exit(0);
+					break;
+				case SDL_KEYDOWN:
+					switch (event.key.keysym.sym){
+						case SDLK_ESCAPE:
+							return(0);
+							break;
+						case SDLK_p:
+							jeux_en_pause(elts_graphs);
+							event.key.keysym.sym = SDLK_t;
+							break;
+						default:
+							break;
+					}
+					break;
+				default:
+					break;
+		}
 	}
 
 		blit_jeux(elts_graphs, ej_jeux, 1);
