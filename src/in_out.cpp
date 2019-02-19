@@ -29,7 +29,7 @@ void pause(float float_temps){
 }
 
 void faire_pause(){
-	std::cout << "Press enter to continue...";
+	std::cout << "Appuyez sur Entrer pour continuer...";
     std::cin.get();
     std::cin.get();
 }
